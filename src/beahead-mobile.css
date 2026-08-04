@@ -1,0 +1,135 @@
+/* Mobile-first conversion layer: a short decision path, generous touch targets, and clear purchase context. */
+@media (max-width: 800px) {
+  .beahead-page { padding-bottom: 82px; overflow-x: hidden; }
+  .ba-alert { min-height: 38px; padding: 8px 14px; font-size: 10px; line-height: 1.35; }
+  .ba-hero, .ba-section { padding: 46px 20px; }
+  .ba-nav { margin-bottom: 23px; }
+  .ba-brand { font-size: 27px; }
+  .ba-chips { gap: 6px; }
+  .ba-chips span { padding: 6px 8px; font-size: 9px; }
+  .ba-kicker { margin: 17px 0 11px; font-size: 10px; line-height: 1.25; }
+  .ba-hero-grid { display: flex; flex-direction: column; gap: 26px; }
+  .ba-hero-grid > div:first-child { width: 100%; }
+  .ba-hero h1 { max-width: 360px; margin-right: auto; font-size: clamp(39px, 11.5vw, 48px) !important; line-height: 1.12 !important; letter-spacing: -2.1px !important; }
+  .beahead-page h2 { font-size: clamp(31px, 9.2vw, 42px); line-height: 1.12; letter-spacing: -1.9px; }
+  .ba-hero h1 em, .beahead-page h2 em { text-decoration-thickness: 5px; text-underline-offset: 5px; }
+  .ba-lead { margin: 18px 0 20px; font-size: 16px; line-height: 1.5; }
+  .ba-hero-actions { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: stretch; }
+  .ba-hero-actions .ba-cta { width: 100%; min-height: 58px; padding: 13px 14px; font-size: 15px; }
+  .ba-price { min-width: 65px; align-content: center; }
+  .ba-price strong { font-size: 28px; }
+  .ba-price small { font-size: 9px; }
+  .ba-points { margin-top: 22px !important; gap: 9px !important; }
+  .ba-points span { align-items: flex-start; font-size: 14px !important; line-height: 1.32; }
+  .ba-points svg { flex: 0 0 auto; margin-top: 1px; }
+  .ba-hero-fomo { margin-top: 20px; font-size: 12px; }
+  .ba-hero-credibility { margin-top: 17px !important; gap: 7px !important; font-size: 12px !important; }
+  .ba-hero-media { width: 100%; order: 2; }
+  .ba-hero-media > .ba-media-slot { min-height: 310px; border-radius: 8px; }
+  .ba-float { display: none; }
+  .ba-session { margin-top: 28px; padding: 9px; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .ba-session > div { min-height: 62px; padding: 10px; font-size: 10px; line-height: 1.3; }
+  .ba-session > div:nth-child(3) { display: flex; grid-column: 1 / -1; }
+  .ba-session > .ba-cta { display: none; }
+  .ba-cta { min-height: 54px; padding: 13px 16px; font-size: 15px; }
+
+  .ba-pain-intro, .ba-curriculum-intro { font-size: 15px; line-height: 1.55; }
+  .ba-pain-grid, .ba-outcomes, .ba-bonus-grid, .ba-company-shift, .ba-data-points { display: grid; grid-template-columns: 1fr; gap: 12px; margin: 28px auto 24px; }
+  .ba-pain-grid article { padding: 20px; }
+  .ba-pain-grid h3 { margin: 11px 0 8px; font-size: 18px; }
+  .ba-pain-grid p, .ba-outcomes p, .ba-bonus-grid p { font-size: 14px; line-height: 1.5; }
+  .ba-callout { padding: 18px; align-items: flex-start; }
+  .ba-callout p { font-size: 15px; }
+  .ba-outcomes article { min-height: 0; padding: 20px; }
+  .ba-outcomes h3 { margin: 20px 0 7px; font-size: 18px; }
+  .ba-outcomes article > svg { top: 16px; right: 16px; }
+
+  .ba-section-head { display: block; }
+  .ba-note { max-width: none; margin-top: 20px; padding: 14px; font-size: 13px; }
+  .ba-audience { margin-top: 25px; }
+  .ba-audience article { grid-template-columns: 36px 1fr 18px; gap: 9px; padding: 16px 0; }
+  .ba-audience p { font-size: 14px; line-height: 1.4; }
+  .ba-why { display: flex; flex-direction: column; gap: 25px; text-align: left; }
+  .ba-why-copy { width: 100%; }
+  .ba-why-copy > p:not(.ba-kicker) { font-size: 15px; line-height: 1.55; }
+  .ba-why .ba-cta { width: 100%; }
+  .ba-why-media { display: none; }
+
+  .ba-workplace-lead { font-size: 16px !important; line-height: 1.45 !important; }
+  .ba-data-points article { padding: 17px; text-align: left; }
+  .ba-data-points b { font-size: 29px; }
+  .ba-data-points span { display: block; margin-top: 3px; font-size: 13px; }
+  .ba-data-source, .ba-source-note { font-size: 10px; line-height: 1.45; }
+  .ba-company-shift { margin-top: 34px; }
+  .ba-company-shift article { padding: 22px !important; }
+  .ba-company-heading img { width: 74px !important; height: 74px !important; }
+  .ba-company-heading b { font-size: 25px !important; }
+  .ba-company-fact { margin-top: 18px !important; font-size: 24px !important; }
+  .ba-company-shift p { margin: 12px 0 17px !important; font-size: 14px !important; line-height: 1.5; }
+  .ba-shift-close { display: flex; flex-direction: column; align-items: stretch; gap: 14px; margin-top: 27px; padding: 20px; }
+  .ba-shift-close span { font-size: 14px; }
+  .ba-shift-close .ba-cta { width: 100%; }
+
+  .ba-tool-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 24px; }
+  .ba-tool-row span { min-height: 62px; justify-content: center; padding: 10px !important; font-size: 12px !important; }
+  .ba-tool-row span:last-child { grid-column: 1 / -1; }
+  .ba-tool-row img { width: 31px !important; height: 31px !important; }
+  .ba-modules { margin: 30px auto 25px; }
+  .ba-modules article { grid-template-columns: 40px 1fr 18px; gap: 10px; padding: 17px 0; }
+  .ba-modules h3 { font-size: 16px; line-height: 1.3; }
+  .ba-modules p { font-size: 13px; line-height: 1.45; }
+  .ba-ai-worker-callout { margin-bottom: 24px; padding: 19px; }
+  .ba-ai-worker-callout b { font-size: 14px; line-height: 1.3; }
+  .ba-ai-worker-callout p { font-size: 14px; line-height: 1.5; }
+
+  .ba-compare { display: grid; grid-template-columns: 1fr; margin-top: 28px; }
+  .ba-compare article { padding: 22px; }
+  .ba-compare h3 { font-size: 21px; }
+  .ba-compare p { padding: 12px 0; font-size: 14px; }
+  .ba-contrast-cta { display: flex; flex-direction: column; align-items: stretch; gap: 14px; margin-top: 24px; }
+  .ba-contrast-cta b { font-size: 15px; line-height: 1.4; }
+  .ba-contrast-cta .ba-cta { width: 100%; }
+
+  .ba-instructor-grid { display: flex; flex-direction: column; gap: 25px; }
+  .ba-portrait { width: 100%; min-height: 315px; }
+  .ba-letter { padding: 19px 18px; }
+  .ba-letter p { font-size: 14px !important; line-height: 1.57 !important; }
+  .ba-signature { font-size: 29px; }
+  .ba-credentials { display: grid; gap: 10px; }
+  .ba-credentials span { font-size: 12px; }
+  .ba-bonus-grid article { padding: 21px; }
+  .ba-bonus-grid h3 { font-size: 18px; }
+
+  .ba-offer { padding: 28px 12px; }
+  .ba-offer-card { display: flex; flex-direction: column; gap: 25px; padding: 25px 19px; }
+  .ba-offer-card h2 { font-size: 34px; }
+  .ba-offer-card > div > p:not(.ba-kicker) { font-size: 15px; line-height: 1.55; }
+  .ba-includes span { align-items: flex-start; font-size: 13px; line-height: 1.4; }
+  .ba-offer aside { padding: 22px 17px; }
+  .ba-offer aside .ba-cta { width: 100%; min-height: 58px; font-size: 15px; }
+  .ba-offer aside p { font-size: 10px; }
+
+  .ba-faq { padding: 45px 20px; }
+  .ba-faq h2 { margin-bottom: 25px; }
+  .ba-faq button { min-height: 62px; padding: 17px 0; font-size: 15px; line-height: 1.35; }
+  .ba-faq article p { padding-right: 8px; font-size: 14px; line-height: 1.55; }
+  .ba-final-call { display: flex; flex-direction: column; align-items: stretch; gap: 16px; padding: 20px; }
+  .ba-final-call .ba-cta { width: 100%; }
+  .ba-footer { padding: 30px 20px; }
+
+  .ba-mobile-cta { min-height: 70px; padding: 9px 12px calc(9px + env(safe-area-inset-bottom)); gap: 10px; }
+  .ba-mobile-cta span { min-width: 64px; font-size: 19px; }
+  .ba-mobile-cta small { font-size: 9px; }
+  .ba-mobile-cta .ba-cta { flex: 1; min-height: 51px; padding: 10px; border-bottom-width: 4px; font-size: 14px; }
+}
+
+@media (max-width: 370px) {
+  .ba-hero, .ba-section { padding-left: 16px; padding-right: 16px; }
+  .ba-hero h1 { font-size: 38px !important; }
+  .ba-hero-actions { grid-template-columns: 1fr; }
+  .ba-price { display: flex; align-items: baseline; justify-content: center; gap: 6px; }
+  .ba-price small { order: 2; }
+  .ba-session { grid-template-columns: 1fr; }
+  .ba-session > div { grid-column: auto !important; }
+  .ba-mobile-cta span { display: none; }
+}
