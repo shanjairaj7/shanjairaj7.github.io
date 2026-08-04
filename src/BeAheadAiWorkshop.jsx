@@ -8,7 +8,7 @@ import './beahead-mobile.css';
 import './urgency.css';
 import './offer-details.css';
 
-const enrol = () => { window.location.href = '/register#registration-form'; };
+const enrol = () => { window.location.href = '/#/register'; };
 const CTA = ({ children = 'Reserve my live seat' }) => <button className="ba-cta" onClick={enrol}>{children}<ArrowRight size={17}/></button>;
 
 const earlyBirdEndsAt = new Date('2026-08-04T23:59:59+05:30').getTime();
@@ -91,7 +91,7 @@ const toolLogos = [
 export default function BeAheadAiWorkshop() {
   const [open, setOpen] = useState(0);
   return <div className="beahead-page">
-    <div className="ba-alert"><Sparkles size={14}/> LIVE THIS SUNDAY · 9 AUGUST · 3:00 PM–6:00 PM IST <EarlyBirdTimer compact/> <a href="/register">Register now</a></div>
+    <div className="ba-alert"><Sparkles size={14}/> LIVE THIS SUNDAY · 9 AUGUST · 3:00 PM–6:00 PM IST <EarlyBirdTimer compact/> <a href="/#/register">Register now</a></div>
     <main>
       <section className="ba-hero" id="top">
         <nav className="ba-nav"><a href="/" className="ba-brand">Be<span>Ahead</span></a><span>Live AI workshop for working professionals</span></nav>
@@ -159,7 +159,7 @@ export default function BeAheadAiWorkshop() {
 
       <section className="ba-section ba-faq"><p className="ba-kicker">FREQUENTLY ASKED QUESTIONS</p><h2>Questions are normal.<br/><em>Starting is your choice.</em></h2><div>{faqs.map(([q, a], i) => <article className={open === i ? 'is-open' : ''} key={q}><button onClick={() => setOpen(open === i ? -1 : i)}><span>{q}</span><ChevronDown/></button>{open === i && <p>{a}</p>}</article>)}</div><div className="ba-final-call"><p><b>You do not need to change your whole career this Sunday.</b><br/>You only need to take your first step.</p><CTA>Reserve my ₹150 seat</CTA></div></section>
     </main>
-    <footer className="ba-footer"><a href="#top" className="ba-brand">Be<span>Ahead</span></a><p>Simple AI skills for people who want to stay ahead.</p><a href="/build-app-with-ai">View the AI App-Building Workshop →</a></footer>
+    <footer className="ba-footer"><a href="#top" className="ba-brand">Be<span>Ahead</span></a><p>Simple AI skills for people who want to stay ahead.</p><a href="/#/build-app-with-ai">View the AI App-Building Workshop →</a></footer>
     <div className="ba-mobile-cta"><span><b>₹150</b><small> Live this Sunday</small></span><CTA>Join live workshop</CTA></div>
   </div>;
 }

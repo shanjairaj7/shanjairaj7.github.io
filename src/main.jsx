@@ -71,7 +71,7 @@ function AppIdeaWorkshop() {
  </main><footer><a className="brand" href="#top"><span>upskill</span><b>AI</b></a><p>Build boldly. Start simply.</p><span>© 2026 upskillAI</span></footer><div className="mobile-cta"><span><b>₹150</b><small> Live workshop</small></span><CTA label="Join now"/></div></>;
 }
 const pathname = window.location.pathname.replace(/\/$/, '');
-const hashPath = window.location.hash.replace(/^#/, '').replace(/\/$/, '');
+const hashPath = window.location.hash.replace(/^#/, '').split('#')[0].replace(/\/$/, '');
 const pagePath = pathname === '' ? hashPath : pathname;
 const page = pagePath === '/build-app-with-ai' ? <AppIdeaWorkshop/> : pagePath === '/register' ? <RegisterPage/> : pagePath === '/checkout' ? <CheckoutPage/> : <BeAheadAiWorkshop/>;
 createRoot(document.getElementById('root')).render(page);

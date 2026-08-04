@@ -43,7 +43,7 @@ export default function RegisterPage() {
       firstName: data.get('firstName'), lastName: data.get('lastName'), email: data.get('email'),
       phone: `${country.code} ${data.get('phone')}`, profession: data.get('profession'),
     }));
-    window.location.href = '/checkout';
+    window.location.href = '/#/checkout';
   };
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => formCardRef.current?.scrollIntoView({ block: 'start' }));

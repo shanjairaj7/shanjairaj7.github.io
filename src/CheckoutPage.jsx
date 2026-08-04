@@ -25,7 +25,7 @@ export default function CheckoutPage() {
     else setPaymentNotice(true);
   };
   return <main className="register-page checkout-page">
-    <header className="rp-top"><a href="/register#registration-form"><ArrowLeft size={18}/> Back to details</a><a className="rp-brand" href="/">Be<span>Ahead</span></a></header>
+    <header className="rp-top"><a href="/#/register"><ArrowLeft size={18}/> Back to details</a><a className="rp-brand" href="/">Be<span>Ahead</span></a></header>
     <section className="rp-hero co-hero"><p>ONE MORE STEP · LIVE THIS SUNDAY</p><h1>Your workshop seat is <em>almost reserved.</em></h1><span>Check your order below. Add the extra live session only if you want it.</span></section>
     <div className="rp-layout co-layout">
       <section className="rp-form-card co-payment-card">
@@ -37,7 +37,7 @@ export default function CheckoutPage() {
           <div className="co-add-action"><span><s>₹{regularUpgradePrice.toLocaleString('en-IN')}</s> <b>₹{upgradePrice}</b></span><em>Save ₹{(regularUpgradePrice - upgradePrice).toLocaleString('en-IN')}</em><button onClick={() => setAddUpgrade(added => !added)} aria-pressed={addUpgrade}>{addUpgrade ? <><Check/> Added</> : <><Plus/> Add live session</>}</button></div>
         </article>
         <p className="co-choice-note">{addUpgrade ? 'The live Build With AI session is added to your order.' : 'You can continue with only the main AI workshop.'}</p>
-        <div className="co-contact"><p><Mail/><span><b>{registration?.email || 'Your email'}</b>Confirmation will be sent here after payment.</span></p><p><Smartphone/><span><b>{registration?.phone || 'Your WhatsApp number'}</b>Workshop details will be sent here after payment.</span></p><a href="/register#registration-form">Change details</a></div>
+        <div className="co-contact"><p><Mail/><span><b>{registration?.email || 'Your email'}</b>Confirmation will be sent here after payment.</span></p><p><Smartphone/><span><b>{registration?.phone || 'Your WhatsApp number'}</b>Workshop details will be sent here after payment.</span></p><a href="/#/register">Change details</a></div>
         <button className="rp-pay co-continue" onClick={continueToPayment}>Continue to secure payment · ₹{total} <ChevronRight size={18}/></button>
         {paymentNotice && <p className="rp-setup-note"><b>Payment links need to be connected.</b> Add the base and add-on links in Netlify before accepting payments. No personal information has been sent.</p>}
         <div className="rp-security"><article><LockKeyhole/><div><b>Secure checkout</b><span>Payment happens with your payment provider.</span></div></article><article><ShieldCheck/><div><b>Your details stay private</b><span>Used only for workshop registration.</span></div></article><article><Check/><div><b>Clear choice</b><span>The add-on is optional.</span></div></article></div>
