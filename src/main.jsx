@@ -75,7 +75,7 @@ function AppIdeaWorkshop() {
 }
 function currentRoute() {
   const pathname = window.location.pathname.replace(/\/$/, '');
-  const hashPath = window.location.hash.replace(/^#/, '').split('#')[0].replace(/\/$/, '');
+  const hashPath = window.location.hash.replace(/^#/, '').split(/[?#]/)[0].replace(/\/$/, '');
   return pathname === '' ? hashPath : pathname;
 }
 
