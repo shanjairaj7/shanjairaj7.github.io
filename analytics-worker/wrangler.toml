@@ -1,0 +1,13 @@
+name = "made-for-more-analytics"
+main = "src/index.js"
+compatibility_date = "2026-08-04"
+workers_dev = true
+
+[vars]
+ALLOWED_ORIGINS = "https://shanjairaj7.github.io"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "made-for-more-analytics"
+database_id = "02aa184d-08d0-4d10-8ba4-6edd60e9b475"
+migrations_dir = "migrations"
