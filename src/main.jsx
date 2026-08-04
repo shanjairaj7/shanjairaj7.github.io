@@ -70,8 +70,27 @@ function AppIdeaWorkshop() {
   <section className="section faq"><p className="eyebrow">FREQUENTLY ASKED QUESTIONS</p><h2>Questions are normal.<br/><em>Staying stuck is optional.</em></h2><div>{faqs.map(([q,a],i)=><article className={openFaq === i ? 'open' : ''} key={q}><button onClick={()=>setOpenFaq(openFaq===i?-1:i)}><span>{q}</span><ChevronDown/></button>{openFaq===i&&<p>{a}</p>}</article>)}</div></section>
  </main><footer><a className="brand" href="#top"><span>upskill</span><b>AI</b></a><p>Build boldly. Start simply.</p><span>© 2026 upskillAI</span></footer><div className="mobile-cta"><span><b>₹150</b><small> Live workshop</small></span><CTA label="Join now"/></div></>;
 }
-const pathname = window.location.pathname.replace(/\/$/, '');
-const hashPath = window.location.hash.replace(/^#/, '').split('#')[0].replace(/\/$/, '');
-const pagePath = pathname === '' ? hashPath : pathname;
-const page = pagePath === '/build-app-with-ai' ? <AppIdeaWorkshop/> : pagePath === '/register' ? <RegisterPage/> : pagePath === '/checkout' ? <CheckoutPage/> : <BeAheadAiWorkshop/>;
-createRoot(document.getElementById('root')).render(page);
+function currentRoute() {
+  const pathname = window.location.pathname.replace(/\/$/, '');
+  const hashPath = window.location.hash.replace(/^#/, '').split('#')[0].replace(/\/$/, '');
+  return pathname === '' ? hashPath : pathname;
+}
+
+function Router() {
+  const [route, setRoute] = useState(currentRoute);
+  useEffect(() => {
+    const updateRoute = () => setRoute(currentRoute());
+    window.addEventListener('hashchange', updateRoute);
+    window.addEventListener('popstate', updateRoute);
+    return () => {
+      window.removeEventListener('hashchange', updateRoute);
+      window.removeEventListener('popstate', updateRoute);
+    };
+  }, []);
+  if (route === '/build-app-with-ai') return <AppIdeaWorkshop/>;
+  if (route === '/register') return <RegisterPage/>;
+  if (route === '/checkout') return <CheckoutPage/>;
+  return <BeAheadAiWorkshop/>;
+}
+
+createRoot(document.getElementById('root')).render(<Router/>);

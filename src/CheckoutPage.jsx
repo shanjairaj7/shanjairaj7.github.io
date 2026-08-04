@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, Check, ChevronRight, LockKeyhole, Mail, Plus, ShieldCheck, Smartphone, Sparkles } from 'lucide-react';
 import './register.css';
 import './checkout.css';
@@ -13,11 +13,16 @@ export default function CheckoutPage() {
   const [registration, setRegistration] = useState(null);
   const [addUpgrade, setAddUpgrade] = useState(false);
   const [paymentNotice, setPaymentNotice] = useState(false);
+  const checkoutCardRef = useRef(null);
   const active = Date.now() < earlyBirdEndsAt;
   const workshopPrice = active ? 150 : 200;
   const total = workshopPrice + (addUpgrade ? upgradePrice : 0);
   useEffect(() => {
     try { setRegistration(JSON.parse(window.sessionStorage.getItem('beaheadRegistration') || 'null')); } catch { setRegistration(null); }
+  }, []);
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => checkoutCardRef.current?.scrollIntoView({ block: 'start' }));
+    return () => window.cancelAnimationFrame(frame);
   }, []);
   const continueToPayment = () => {
     const paymentUrl = addUpgrade ? upgradePaymentUrl : basePaymentUrl;
@@ -28,7 +33,7 @@ export default function CheckoutPage() {
     <header className="rp-top"><a href="/#/register"><ArrowLeft size={18}/> Back to details</a><a className="rp-brand" href="/">Be<span>Ahead</span></a></header>
     <section className="rp-hero co-hero"><p>ONE MORE STEP · LIVE THIS SUNDAY</p><h1>Your workshop seat is <em>almost reserved.</em></h1><span>Check your order below. Add the extra live session only if you want it.</span></section>
     <div className="rp-layout co-layout">
-      <section className="rp-form-card co-payment-card">
+      <section className="rp-form-card co-payment-card" ref={checkoutCardRef}>
         <div className="rp-card-title"><p>BEAHEAD LIVE CLAUDE & AI WORKSHOP</p><h2>Complete your registration</h2><span>Sunday, 9 August · 3:00 PM–6:00 PM IST · Live online</span></div>
         <div className="co-summary"><div><span>Live workshop seat</span><b>₹{workshopPrice}</b></div>{addUpgrade && <div className="co-summary-added"><span>Build With AI live upgrade</span><b>₹{upgradePrice}</b></div>}<div className="co-summary-total"><span>Total payable</span><b>₹{total}</b></div></div>
         <article className={`co-add-card ${addUpgrade ? 'is-added' : ''}`}>
