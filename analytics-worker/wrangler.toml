@@ -5,7 +5,7 @@ workers_dev = true
 
 [vars]
 ALLOWED_ORIGINS = "https://shanjairaj7.github.io"
-META_PIXEL_ID = "2116791989201162"
+META_PIXEL_ID = "2238910003510755"
 
 [[d1_databases]]
 binding = "DB"

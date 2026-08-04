@@ -1,4 +1,4 @@
-const pixelId = '2116791989201162';
+const pixelId = '2238910003510755';
 let initialized = false;
 
 export function initMetaPixel() {
