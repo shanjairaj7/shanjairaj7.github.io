@@ -135,6 +135,46 @@ async function verifyPaddleSignature(rawBody, header, secret) {
   return signatures.some((candidate) => constantTimeEqual(hash, candidate));
 }
 
+async function sha256(value) {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
+async function sendMetaPurchase(request, transaction, customData, env) {
+  if (!env.META_CAPI_ACCESS_TOKEN || !env.META_PIXEL_ID) return;
+  const customerEmail = (transaction.customer?.email || customData.email || '').trim().toLowerCase();
+  const customerPhone = (customData.phone || '').replace(/[^0-9]/g, '');
+  const userData = {};
+  if (customerEmail) userData.em = [await sha256(customerEmail)];
+  if (customerPhone) userData.ph = [await sha256(customerPhone)];
+  if (validId(customData.visitor_id)) userData.external_id = [await sha256(customData.visitor_id)];
+  const clientIp = request.headers.get('CF-Connecting-IP');
+  if (clientIp) userData.client_ip_address = clientIp;
+  const completedAt = transaction.completed_at || new Date().toISOString();
+  const amount = Number(transaction.details?.totals?.total || 0);
+  const payload = {
+    data: [{
+      event_name: 'Purchase',
+      event_time: Math.floor(Date.parse(completedAt) / 1000),
+      event_id: `paddle_${transaction.id}`,
+      action_source: 'website',
+      event_source_url: 'https://shanjairaj7.github.io/',
+      user_data: userData,
+      custom_data: {
+        currency: transaction.currency_code || 'INR',
+        value: Number.isFinite(amount) ? amount / 100 : 0,
+        content_name: customData.selected_offer === 'bundle' ? 'Made for More workshop + Build With AI add-on' : 'Made for More Live Claude & AI Workshop',
+      },
+    }],
+  };
+  const response = await fetch(`https://graph.facebook.com/v23.0/${env.META_PIXEL_ID}/events?access_token=${encodeURIComponent(env.META_CAPI_ACCESS_TOKEN)}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) console.warn(`Meta Purchase event was not accepted (${response.status})`);
+}
+
 async function handlePaddleWebhook(request, env) {
   const rawBody = await request.text();
   const valid = await verifyPaddleSignature(rawBody, request.headers.get('paddle-signature'), env.PADDLE_WEBHOOK_SECRET);
@@ -157,6 +197,7 @@ async function handlePaddleWebhook(request, env) {
       .bind(`paddle_${transaction.id}`, customData.visitor_id, customData.session_id, transaction.completed_at || now,
         toJson({ transaction_id: transaction.id, amount: transaction.details?.totals?.total || null, currency_code: transaction.currency_code || null })).run();
   }
+  try { await sendMetaPurchase(request, transaction, customData, env); } catch { console.warn('Meta Purchase event could not be sent'); }
   return json({ received: true });
 }
 

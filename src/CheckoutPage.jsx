@@ -4,6 +4,7 @@ import { ArrowLeft, Check, ChevronRight, LockKeyhole, Mail, Plus, ShieldCheck, S
 import './register.css';
 import './checkout.css';
 import { flush, getSessionId, getVisitorId, saveLeadDraft, track } from './analytics';
+import { trackMeta } from './metaPixel';
 
 const paddleClientToken = import.meta.env.VITE_PADDLE_CLIENT_TOKEN || '';
 const workshopPriceId = import.meta.env.VITE_PADDLE_WORKSHOP_PRICE_ID || '';
@@ -28,6 +29,7 @@ export default function CheckoutPage() {
     if (!registration || checkoutTrackedRef.current) return;
     checkoutTrackedRef.current = true;
     track('checkout_viewed', { workshop_price: workshopPrice });
+    trackMeta('InitiateCheckout', { content_name: 'Made for More Live Claude & AI Workshop', currency: 'INR', value: workshopPrice });
     if (registration.analyticsConsent) saveLeadDraft({ ...registration, consent: true, checkoutViewed: true });
   }, [registration]);
   useEffect(() => {
@@ -62,7 +64,7 @@ export default function CheckoutPage() {
         <article className={`co-add-card ${addUpgrade ? 'is-added' : ''}`}>
           <div className="co-add-icon"><Sparkles/></div>
           <div className="co-add-copy"><p>OPTIONAL LIVE ADD-ON</p><h3>Want to learn how to build your own app with AI?</h3><span>Learn prompt engineering. Turn an idea into a simple app. Put it online and add a way for customers to pay — no coding needed.</span><small><Check/> Claude, Gemini, Perplexity & Codex · Live step by step</small></div>
-          <div className="co-add-action"><span><s>₹{regularUpgradePrice.toLocaleString('en-IN')}</s> <b>₹{upgradePrice}</b></span><em>Save ₹{(regularUpgradePrice - upgradePrice).toLocaleString('en-IN')}</em><button onClick={() => { const next = !addUpgrade; setAddUpgrade(next); track(next ? 'addon_selected' : 'addon_removed', { addon_price: upgradePrice }); }} aria-pressed={addUpgrade}>{addUpgrade ? <><Check/> Added</> : <><Plus/> Add live session</>}</button></div>
+          <div className="co-add-action"><span><s>₹{regularUpgradePrice.toLocaleString('en-IN')}</s> <b>₹{upgradePrice}</b></span><em>Save ₹{(regularUpgradePrice - upgradePrice).toLocaleString('en-IN')}</em><button onClick={() => { const next = !addUpgrade; setAddUpgrade(next); track(next ? 'addon_selected' : 'addon_removed', { addon_price: upgradePrice }); if (next) trackMeta('AddToCart', { content_name: 'Build With AI live add-on', currency: 'INR', value: upgradePrice }); }} aria-pressed={addUpgrade}>{addUpgrade ? <><Check/> Added</> : <><Plus/> Add live session</>}</button></div>
         </article>
         <p className="co-choice-note">{addUpgrade ? 'The live Build With AI session is added to your order.' : 'You can continue with only the main AI workshop.'}</p>
         <div className="co-contact"><p><Mail/><span><b>{registration?.email || 'Your email'}</b>Confirmation will be sent here after payment.</span></p><p><Smartphone/><span><b>{registration?.phone || 'Your WhatsApp number'}</b>Workshop details will be sent here after payment.</span></p><a href="/#/register">Change details</a></div>

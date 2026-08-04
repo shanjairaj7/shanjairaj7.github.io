@@ -6,6 +6,7 @@ import MadeForMoreAiWorkshop from './BeAheadAiWorkshop';
 import RegisterPage from './RegisterPage';
 import CheckoutPage from './CheckoutPage';
 import { observeSections, startJourney, track } from './analytics';
+import { initMetaPixel, trackMeta } from './metaPixel';
 
 const scrollToOffer = () => document.querySelector('#enrol')?.scrollIntoView({ behavior: 'smooth' });
 
@@ -89,6 +90,8 @@ function Router() {
     };
   }, []);
   useEffect(() => {
+    initMetaPixel();
+    trackMeta('PageView');
     startJourney(route || '/');
     let stopObserving;
     const timer = window.setTimeout(() => { stopObserving = observeSections(); }, 0);
