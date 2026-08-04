@@ -159,7 +159,7 @@ export default function MadeForMoreAiWorkshop() {
 
       <section className="ba-section ba-faq"><p className="ba-kicker">FREQUENTLY ASKED QUESTIONS</p><h2>Questions are normal.<br/><em>Starting is your choice.</em></h2><div>{faqs.map(([q, a], i) => <article className={open === i ? 'is-open' : ''} key={q}><button onClick={() => setOpen(open === i ? -1 : i)}><span>{q}</span><ChevronDown/></button>{open === i && <p>{a}</p>}</article>)}</div><div className="ba-final-call"><p><b>You do not need to change your whole career this Sunday.</b><br/>You only need to take your first step.</p><CTA>Reserve my ₹150 seat</CTA></div></section>
     </main>
-    <footer className="ba-footer"><a href="#top" className="ba-brand">Made <span>for More</span></a><p>Simple AI skills for people who want to stay ahead.</p><a href="/#/build-app-with-ai">View the AI App-Building Workshop →</a><span><a href="/terms.html">Terms</a> · <a href="/privacy.html">Privacy</a> · <a href="/refunds.html">Refunds</a></span></footer>
+    <footer className="ba-footer"><a href="#top" className="ba-brand">Made <span>for More</span></a><p>Simple AI skills for people who want to stay ahead.</p><a href="/#/build-app-with-ai">View the AI App-Building Workshop →</a><span><a href="mailto:shanjairajdev@gmail.com">Support</a> · <a href="/terms.html">Terms</a> · <a href="/privacy.html">Privacy</a> · <a href="/refunds.html">Refunds</a></span></footer>
     <div className="ba-mobile-cta"><span><b>₹150</b><small> Live this Sunday</small></span><CTA>Join live workshop</CTA></div>
   </div>;
 }
