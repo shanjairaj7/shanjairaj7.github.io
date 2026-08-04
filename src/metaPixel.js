@@ -20,9 +20,9 @@ export function initMetaPixel() {
   window.fbq('init', pixelId);
 }
 
-export function trackMeta(eventName, parameters = {}) {
+export function trackMeta(eventName, parameters = {}, options) {
   if (!pixelId || typeof window === 'undefined' || typeof window.fbq !== 'function') return;
-  window.fbq('track', eventName, parameters);
+  window.fbq('track', eventName, parameters, options);
 }
 
 export const madeForMorePixelId = pixelId;

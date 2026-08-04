@@ -39,7 +39,21 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (!paddleClientToken) return undefined;
     let active = true;
-    initializePaddle({ token: paddleClientToken }).then((paddle) => { if (active) paddleRef.current = paddle; });
+    initializePaddle({
+      token: paddleClientToken,
+      eventCallback: (event) => {
+        if (event.name !== 'checkout.completed') return;
+        const total = Number(event.data?.totals?.total || 0) / 100;
+        const isBundle = event.data?.custom_data?.selected_offer === 'bundle';
+        trackMeta('Purchase', {
+          currency: event.data?.currency_code || 'INR',
+          value: Number.isFinite(total) ? total : workshopPrice,
+          content_name: isBundle
+            ? 'Made for More workshop + Build With AI live add-on'
+            : 'Made for More Live Claude & AI Workshop',
+        }, { eventID: `paddle_${event.data?.transaction_id}` });
+      },
+    }).then((paddle) => { if (active) paddleRef.current = paddle; });
     return () => { active = false; };
   }, []);
   const continueToPayment = () => {
