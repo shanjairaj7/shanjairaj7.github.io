@@ -41,18 +41,23 @@ export default function RegisterPage() {
   const completedFieldsRef = useRef(new Set());
   const registrationStartedRef = useRef(false);
   const price = workshopPrice;
-  const draft = (consent = draftConsent) => {
+  const draft = (consent = draftConsent, countryValue = country) => {
     const data = new FormData(formRef.current);
     return {
       consent,
       firstName: data.get('firstName'), lastName: data.get('lastName'), email: data.get('email'),
-      phone: `${country.code} ${data.get('phone') || ''}`.trim(), profession: data.get('profession'),
+      phone: `${countryValue.code} ${data.get('phone') || ''}`.trim(), profession: data.get('profession'),
     };
   };
-  const queueDraft = (consent = draftConsent) => {
+  const queueDraft = (consent = draftConsent, countryValue = country) => {
     if (!consent) return;
+    const nextDraft = draft(consent, countryValue);
+    window.localStorage.setItem('madeForMoreRegistrationDraftUI', JSON.stringify({
+      ...nextDraft,
+      countryCode: countryValue.code,
+    }));
     window.clearTimeout(draftTimerRef.current);
-    draftTimerRef.current = window.setTimeout(() => saveLeadDraft(draft(consent)), 700);
+    draftTimerRef.current = window.setTimeout(() => saveLeadDraft(nextDraft), 700);
   };
   const submit = event => {
     event.preventDefault();
@@ -72,13 +77,29 @@ export default function RegisterPage() {
     const frame = window.requestAnimationFrame(() => formCardRef.current?.scrollIntoView({ block: 'start' }));
     return () => window.cancelAnimationFrame(frame);
   }, []);
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(window.localStorage.getItem('madeForMoreRegistrationDraftUI') || 'null');
+      if (!saved?.consent || !formRef.current) return;
+      const form = formRef.current.elements;
+      form.firstName.value = saved.firstName || '';
+      form.lastName.value = saved.lastName || '';
+      form.phone.value = (saved.phone || '').replace(saved.countryCode || '', '').trim();
+      form.email.value = saved.email || '';
+      form.profession.value = saved.profession || '';
+      form.consent.checked = true;
+      const savedCountry = countries.find((item) => item.code === saved.countryCode);
+      if (savedCountry) setCountry(savedCountry);
+      setDraftConsent(true);
+    } catch { /* A malformed local draft should never block registration. */ }
+  }, []);
   useEffect(() => () => window.clearTimeout(draftTimerRef.current), []);
   return <main className="register-page">
     <header className="rp-top"><a href="/" aria-label="Back to Made for More"><ArrowLeft size={18}/> Back to workshop</a><a className="rp-brand" href="/">Made <span>for More</span></a></header>
     <section data-track-section="registration-intro" className="rp-hero"><p>LIVE THIS SUNDAY · 9 AUGUST 2026</p><h1>You are one step away from becoming the <em>AI person</em> in your team.</h1><span>3:00 PM–6:00 PM IST · Live online · Simple English</span></section>
     <div className="rp-layout">
       <section data-track-section="registration-form" className="rp-form-card" id="registration-form" ref={formCardRef}><div className="rp-card-title"><p>MADE FOR MORE LIVE CLAUDE & AI WORKSHOP</p><h2>Reserve your live seat</h2><span>Fill this in. Secure payment is the next step.</span></div><Countdown/>
-        <form ref={formRef} onSubmit={submit} onFocus={() => { if (!registrationStartedRef.current) { registrationStartedRef.current = true; track('registration_started'); } }} onChange={() => queueDraft()} onBlur={(event) => { const field = event.target.name; if (field && field !== 'consent' && !completedFieldsRef.current.has(field) && event.target.value) { completedFieldsRef.current.add(field); track('form_field_completed', { field }); } }}><div className="rp-two"><label>First name<input name="firstName" autoComplete="given-name" required placeholder="Your first name"/></label><label>Last name<input name="lastName" autoComplete="family-name" required placeholder="Your last name"/></label></div><label>WhatsApp number<div className="rp-phone"><PhoneCountryPicker value={country} onChange={(value) => { setCountry(value); queueDraft(); }}/><input name="phone" type="tel" inputMode="tel" autoComplete="tel" required placeholder="Your mobile number"/></div></label><label>Email address<input name="email" type="email" inputMode="email" autoComplete="email" required placeholder="you@example.com"/></label><label>Your profession<select name="profession" required defaultValue=""><option value="" disabled>Select your profession</option>{professions.map(profession => <option key={profession}>{profession}</option>)}</select></label><label className="rp-consent"><input name="consent" type="checkbox" required onChange={(event) => { const consent = event.target.checked; setDraftConsent(consent); if (consent) { track('registration_details_saved'); queueDraft(consent); } }}/><span>I agree that Made for More may securely save these details to finish my registration and send workshop information on WhatsApp and email.</span></label><button className="rp-pay" type="submit">Continue to see your live-workshop offer · ₹{price}</button></form>
+        <form ref={formRef} onSubmit={submit} onFocus={() => { if (!registrationStartedRef.current) { registrationStartedRef.current = true; track('registration_started'); } }} onChange={() => queueDraft()} onBlur={(event) => { const field = event.target.name; if (field && field !== 'consent' && !completedFieldsRef.current.has(field) && event.target.value) { completedFieldsRef.current.add(field); track('form_field_completed', { field }); } }}><div className="rp-two"><label>First name<input name="firstName" autoComplete="given-name" required placeholder="Your first name"/></label><label>Last name<input name="lastName" autoComplete="family-name" required placeholder="Your last name"/></label></div><label>WhatsApp number<div className="rp-phone"><PhoneCountryPicker value={country} onChange={(value) => { setCountry(value); queueDraft(draftConsent, value); }}/><input name="phone" type="tel" inputMode="tel" autoComplete="tel" required placeholder="Your mobile number"/></div></label><label>Email address<input name="email" type="email" inputMode="email" autoComplete="email" required placeholder="you@example.com"/></label><label>Your profession<select name="profession" required defaultValue=""><option value="" disabled>Select your profession</option>{professions.map(profession => <option key={profession}>{profession}</option>)}</select></label><label className="rp-consent"><input name="consent" type="checkbox" required onChange={(event) => { const consent = event.target.checked; setDraftConsent(consent); if (consent) { track('registration_details_saved'); queueDraft(consent); } }}/><span>I agree that Made for More may securely save these details to finish my registration and send workshop information on WhatsApp and email.</span></label><button className="rp-pay" type="submit">Continue to see your live-workshop offer · ₹{price}</button></form>
         <div className="rp-security"><article><LockKeyhole/><div><b>HTTPS encrypted</b><span>This page uses a secure connection.</span></div></article><article><ShieldCheck/><div><b>Your details stay private</b><span>Use them only for workshop registration.</span></div></article><article><Smartphone/><div><b>No card details here</b><span>Payment is completed with your payment provider.</span></div></article></div>
         <p className="rp-legal-links"><a href="/terms.html">Terms</a> · <a href="/privacy.html">Privacy</a> · <a href="/refunds.html">Refund policy</a></p>
       </section>

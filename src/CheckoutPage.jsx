@@ -3,7 +3,7 @@ import { initializePaddle } from '@paddle/paddle-js';
 import { ArrowLeft, Check, ChevronRight, LockKeyhole, Mail, Plus, ShieldCheck, Smartphone, Sparkles } from 'lucide-react';
 import './register.css';
 import './checkout.css';
-import { flush, getVisitorId, saveLeadDraft, track } from './analytics';
+import { flush, getSessionId, getVisitorId, saveLeadDraft, track } from './analytics';
 
 const paddleClientToken = import.meta.env.VITE_PADDLE_CLIENT_TOKEN || '';
 const workshopPriceId = import.meta.env.VITE_PADDLE_WORKSHOP_PRICE_ID || '';
@@ -48,7 +48,7 @@ export default function CheckoutPage() {
     paddleRef.current.Checkout.open({
       items: [{ priceId, quantity: 1 }],
       customer: registration?.email ? { email: registration.email } : undefined,
-      customData: registration ? { first_name: registration.firstName, last_name: registration.lastName, phone: registration.phone, profession: registration.profession, selected_offer: addUpgrade ? 'bundle' : 'workshop', visitor_id: getVisitorId() } : undefined,
+      customData: registration ? { first_name: registration.firstName, last_name: registration.lastName, email: registration.email, phone: registration.phone, profession: registration.profession, selected_offer: addUpgrade ? 'bundle' : 'workshop', visitor_id: getVisitorId(), session_id: getSessionId() } : undefined,
       settings: { displayMode: 'overlay', variant: 'one-page', theme: 'light', successUrl: `${window.location.origin}/#/?payment=success` },
     });
   };

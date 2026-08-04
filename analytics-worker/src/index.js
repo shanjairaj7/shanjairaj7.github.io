@@ -144,9 +144,16 @@ async function handlePaddleWebhook(request, env) {
   await env.DB.prepare(`INSERT INTO paddle_orders (transaction_id, visitor_id, customer_email, status, amount, currency_code, completed_at, received_at, order_json)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(transaction_id) DO UPDATE SET status = excluded.status, completed_at = excluded.completed_at, received_at = excluded.received_at, order_json = excluded.order_json`)
-    .bind(transaction.id, validId(customData.visitor_id) ? customData.visitor_id : null, transaction.customer?.email || null,
+    .bind(transaction.id, validId(customData.visitor_id) ? customData.visitor_id : null, transaction.customer?.email || customData.email || null,
       transaction.status || 'completed', transaction.details?.totals?.total || null, transaction.currency_code || null,
       transaction.completed_at || now, now, rawBody).run();
+  if (validId(customData.visitor_id) && validId(customData.session_id)) {
+    await env.DB.prepare(`INSERT INTO journey_events (event_id, visitor_id, session_id, event_type, occurred_at, path, section_id, payload_json)
+      VALUES (?, ?, ?, 'payment_completed', ?, '/checkout', NULL, ?)
+      ON CONFLICT(event_id) DO NOTHING`)
+      .bind(`paddle_${transaction.id}`, customData.visitor_id, customData.session_id, transaction.completed_at || now,
+        toJson({ transaction_id: transaction.id, amount: transaction.details?.totals?.total || null, currency_code: transaction.currency_code || null })).run();
+  }
   return json({ received: true });
 }
 

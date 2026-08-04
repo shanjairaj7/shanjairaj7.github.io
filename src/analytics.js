@@ -17,7 +17,7 @@ export function getVisitorId() {
   return value;
 }
 
-function getSessionId() {
+export function getSessionId() {
   let value = sessionStorage.getItem(sessionKey);
   if (!value) { value = id(); sessionStorage.setItem(sessionKey, value); }
   return value;
