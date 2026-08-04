@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ArrowRight, Check, ChevronDown, Clock3, Code2, Layers3, PlayCircle, Rocket, ShieldCheck, Sparkles, Users } from 'lucide-react';
 import './styles.css';
-import BeAheadAiWorkshop from './BeAheadAiWorkshop';
+import MadeForMoreAiWorkshop from './BeAheadAiWorkshop';
 import RegisterPage from './RegisterPage';
 import CheckoutPage from './CheckoutPage';
 
@@ -90,7 +90,7 @@ function Router() {
   if (route === '/build-app-with-ai') return <AppIdeaWorkshop/>;
   if (route === '/register') return <RegisterPage/>;
   if (route === '/checkout') return <CheckoutPage/>;
-  return <BeAheadAiWorkshop/>;
+  return <MadeForMoreAiWorkshop/>;
 }
 
 createRoot(document.getElementById('root')).render(<Router/>);
