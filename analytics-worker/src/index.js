@@ -97,6 +97,9 @@ async function saveLeadDraft(request, env) {
   const draft = Object.fromEntries(fields.map((field) => [field, validShortText(body[field], 180)]));
   if (draft.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email)) return json({ error: 'Invalid email' }, 400, cors(request, env));
   const now = new Date().toISOString();
+  await env.DB.prepare(`INSERT INTO visitors (visitor_id, first_seen_at, last_seen_at)
+    VALUES (?, ?, ?) ON CONFLICT(visitor_id) DO UPDATE SET last_seen_at = excluded.last_seen_at`)
+    .bind(body.visitor_id, now, now).run();
   await env.DB.prepare(`INSERT INTO lead_drafts (visitor_id, first_name, last_name, email, phone, profession, consent_at, updated_at, registration_submitted_at, checkout_viewed_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(visitor_id) DO UPDATE SET first_name = excluded.first_name, last_name = excluded.last_name, email = excluded.email,
