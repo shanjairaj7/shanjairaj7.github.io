@@ -1,12 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { initializePaddle } from '@paddle/paddle-js';
 import { ArrowLeft, Check, ChevronRight, LockKeyhole, Mail, Plus, ShieldCheck, Smartphone, Sparkles } from 'lucide-react';
 import './register.css';
 import './checkout.css';
 
 const earlyBirdEndsAt = new Date('2026-08-04T23:59:59+05:30').getTime();
-const basePaymentUrl = import.meta.env.VITE_PAYMENT_URL_BASE || import.meta.env.VITE_PAYMENT_URL || '';
-const upgradePaymentUrl = import.meta.env.VITE_PAYMENT_URL_WITH_UPSELL || '';
-const upgradePrice = Number(import.meta.env.VITE_APP_BUILDER_UPSELL_PRICE || 187);
+const paddleClientToken = import.meta.env.VITE_PADDLE_CLIENT_TOKEN || '';
+const workshopPriceId = import.meta.env.VITE_PADDLE_WORKSHOP_PRICE_ID || '';
+const addonPriceId = import.meta.env.VITE_PADDLE_ADDON_PRICE_ID || '';
+const bundlePriceId = import.meta.env.VITE_PADDLE_BUNDLE_PRICE_ID || '';
+const upgradePrice = 342;
 const regularUpgradePrice = Number(import.meta.env.VITE_APP_BUILDER_REGULAR_PRICE || 2100);
 
 export default function CheckoutPage() {
@@ -14,6 +17,7 @@ export default function CheckoutPage() {
   const [addUpgrade, setAddUpgrade] = useState(false);
   const [paymentNotice, setPaymentNotice] = useState(false);
   const checkoutCardRef = useRef(null);
+  const paddleRef = useRef(null);
   const active = Date.now() < earlyBirdEndsAt;
   const workshopPrice = active ? 150 : 200;
   const total = workshopPrice + (addUpgrade ? upgradePrice : 0);
@@ -24,10 +28,21 @@ export default function CheckoutPage() {
     const frame = window.requestAnimationFrame(() => checkoutCardRef.current?.scrollIntoView({ block: 'start' }));
     return () => window.cancelAnimationFrame(frame);
   }, []);
+  useEffect(() => {
+    if (!paddleClientToken) return undefined;
+    let active = true;
+    initializePaddle({ token: paddleClientToken }).then((paddle) => { if (active) paddleRef.current = paddle; });
+    return () => { active = false; };
+  }, []);
   const continueToPayment = () => {
-    const paymentUrl = addUpgrade ? upgradePaymentUrl : basePaymentUrl;
-    if (paymentUrl) window.location.assign(paymentUrl);
-    else setPaymentNotice(true);
+    const priceId = addUpgrade ? bundlePriceId : workshopPriceId;
+    if (!paddleRef.current || !priceId || (addUpgrade && !addonPriceId)) { setPaymentNotice(true); return; }
+    paddleRef.current.Checkout.open({
+      items: [{ priceId, quantity: 1 }],
+      customer: registration?.email ? { email: registration.email } : undefined,
+      customData: registration ? { first_name: registration.firstName, last_name: registration.lastName, phone: registration.phone, profession: registration.profession, selected_offer: addUpgrade ? 'bundle' : 'workshop' } : undefined,
+      settings: { displayMode: 'overlay', variant: 'one-page', theme: 'light', successUrl: `${window.location.origin}/#/?payment=success` },
+    });
   };
   return <main className="register-page checkout-page">
     <header className="rp-top"><a href="/#/register"><ArrowLeft size={18}/> Back to details</a><a className="rp-brand" href="/">Be<span>Ahead</span></a></header>
@@ -44,8 +59,8 @@ export default function CheckoutPage() {
         <p className="co-choice-note">{addUpgrade ? 'The live Build With AI session is added to your order.' : 'You can continue with only the main AI workshop.'}</p>
         <div className="co-contact"><p><Mail/><span><b>{registration?.email || 'Your email'}</b>Confirmation will be sent here after payment.</span></p><p><Smartphone/><span><b>{registration?.phone || 'Your WhatsApp number'}</b>Workshop details will be sent here after payment.</span></p><a href="/#/register">Change details</a></div>
         <button className="rp-pay co-continue" onClick={continueToPayment}>Continue to secure payment · ₹{total} <ChevronRight size={18}/></button>
-        {paymentNotice && <p className="rp-setup-note"><b>Payment links need to be connected.</b> Add the base and add-on links in Netlify before accepting payments. No personal information has been sent.</p>}
-        <div className="rp-security"><article><LockKeyhole/><div><b>Secure checkout</b><span>Payment happens with your payment provider.</span></div></article><article><ShieldCheck/><div><b>Your details stay private</b><span>Used only for workshop registration.</span></div></article><article><Check/><div><b>Clear choice</b><span>The add-on is optional.</span></div></article></div>
+        {paymentNotice && <p className="rp-setup-note"><b>Paddle catalog setup is not complete yet.</b> The live client token is ready. Add the Paddle price IDs after the approved products are created, then this button opens Paddle’s secure checkout.</p>}
+        <div className="rp-security"><article><LockKeyhole/><div><b>Secure checkout</b><span>Payment happens with Paddle.</span></div></article><article><ShieldCheck/><div><b>Your details stay private</b><span>Used only for workshop registration.</span></div></article><article><Check/><div><b>Clear choice</b><span>The add-on is optional.</span></div></article></div><p className="co-policy-links"><a href="/terms.html">Terms</a> · <a href="/privacy.html">Privacy</a> · <a href="/refunds.html">Refund policy</a></p>
       </section>
       <aside className="rp-summary co-side-summary"><p>YOUR LIVE WORKSHOP</p><h2>Sunday, 9 August</h2><div className="rp-invite"><span><b>WHEN</b>3:00 PM–6:00 PM IST</span><span><b>WHERE</b>Live online workshop</span><span><b>WITH</b>Shanjai Raj</span></div><div className="rp-value"><p>YOUR MAIN WORKSHOP</p><span><Check/> Work faster with Claude & AI</span><span><Check/> Make reports, Excel and PPT easier</span><span><Check/> Build an AI worker for repeat work</span><span><Check/> BeAhead workshop certificate</span></div><div className="rp-price" style={{ padding: 15 }}><span>{active ? <>Standard live-seat price <s>₹200</s></> : 'Current live-seat price'}</span><b>{active ? 'Today’s early-bird price' : 'Current price'}</b><strong style={{ fontSize: 36, letterSpacing: -2 }}>₹{workshopPrice}</strong>{active && <em>₹150 price ends at midnight</em>}</div></aside>
     </div>
