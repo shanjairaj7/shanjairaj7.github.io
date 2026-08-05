@@ -53,7 +53,7 @@
   .ba-why-copy { width: 100%; }
   .ba-why-copy > p:not(.ba-kicker) { font-size: 15px; line-height: 1.55; }
   .ba-why .ba-cta { width: 100%; }
-  .ba-why-media { display: none; }
+  .ba-why-media { display: flex; width: 100%; min-height: 290px; }
 
   .ba-workplace-lead { font-size: 16px !important; line-height: 1.45 !important; }
   .ba-data-points article { padding: 17px; text-align: left; }

@@ -130,7 +130,7 @@ export default function MadeForMoreAiWorkshop() {
       </section>
 
       <section data-track-section="why-it-matters" className="ba-section ba-why">
-        <div className="ba-why-copy"><p className="ba-kicker">WHY THIS MATTERS NOW</p><h2>The person who gets noticed may not work the longest. <em>They may work smarter.</em></h2><p>When you make a clear report, a useful Excel sheet or a good PPT faster, people trust you with bigger work.</p><p>AI will not replace your experience. But a person who uses AI well can finish the same work much faster.</p><CTA>I do not want to be left behind</CTA></div><MediaSlot className="ba-why-media" label="Real work before/after collage" note="Add 3 of your own screenshots: report, Excel sheet, PPT. Hide private details."/>
+        <div className="ba-why-copy"><p className="ba-kicker">WHY THIS MATTERS NOW</p><h2>The person who gets noticed may not work the longest. <em>They may work smarter.</em></h2><p>When you make a clear report, a useful Excel sheet or a good PPT faster, people trust you with bigger work.</p><p>AI will not replace your experience. But a person who uses AI well can finish the same work much faster.</p><CTA>I do not want to be left behind</CTA></div><MediaSlot src="/images/work-smarter-before-after.jpg" className="ba-why-media" label="A working professional moving from late manual work to faster AI-assisted work"/>
       </section>
 
       <section data-track-section="workplace-change" className="ba-section ba-workplace-shift" style={{ background: '#f7f6f2', color: '#151819' }}>
