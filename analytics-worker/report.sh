@@ -20,5 +20,8 @@ run_query "SELECT COUNT(*) AS saved_drafts, SUM(CASE WHEN registration_submitted
 echo "\n=== Made for More: verified Paddle payments ==="
 run_query "SELECT currency_code, COUNT(*) AS paid_orders, SUM(CAST(amount AS INTEGER)) AS total_minor_units FROM paddle_orders WHERE status = 'completed' AND completed_at >= datetime('now', '-30 days') GROUP BY currency_code"
 
+echo "\n=== Made for More: Telegram notification delivery ==="
+run_query "SELECT event_type, status, COUNT(*) AS notifications FROM notification_log WHERE attempted_at >= datetime('now', '-30 days') GROUP BY event_type, status ORDER BY event_type, status"
+
 echo "\n=== Made for More: latest anonymous journeys ==="
 run_query "SELECT session_id, visitor_id, MIN(occurred_at) AS started, MAX(occurred_at) AS last_activity, GROUP_CONCAT(DISTINCT event_type) AS actions FROM journey_events WHERE occurred_at >= datetime('now', '-30 days') GROUP BY session_id, visitor_id ORDER BY last_activity DESC LIMIT 25"

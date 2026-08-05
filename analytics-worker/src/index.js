@@ -39,6 +39,35 @@ function toJson(value) {
   try { return JSON.stringify(value ?? {}); } catch { return '{}'; }
 }
 
+function notificationText(title, lines) {
+  return [`<b>${title}</b>`, ...lines.filter(Boolean)].join('\n');
+}
+
+function escapeTelegramHtml(value) {
+  return String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+}
+
+async function sendTelegramNotification(env, { key, visitorId = null, eventType, text, payload = {} }) {
+  if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) return;
+  const now = new Date().toISOString();
+  const claim = await env.DB.prepare(`INSERT INTO notification_log (notification_key, visitor_id, event_type, status, attempted_at, payload_json)
+    VALUES (?, ?, ?, 'pending', ?, ?) ON CONFLICT(notification_key) DO NOTHING`)
+    .bind(key, visitorId, eventType, now, toJson(payload)).run();
+  if (!claim.meta?.changes) return;
+  try {
+    const response = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID, text, parse_mode: 'HTML', disable_web_page_preview: true }),
+    });
+    if (!response.ok) throw new Error(`Telegram returned ${response.status}`);
+    await env.DB.prepare(`UPDATE notification_log SET status = 'sent', sent_at = ? WHERE notification_key = ?`).bind(new Date().toISOString(), key).run();
+  } catch (error) {
+    await env.DB.prepare('DELETE FROM notification_log WHERE notification_key = ?').bind(key).run();
+    console.warn(`Telegram notification could not be sent: ${error.message}`);
+  }
+}
+
 function safeEvent(event) {
   if (!event || !validId(event.event_id) || !eventTypes.has(event.event_type)) return null;
   const occurredAt = validShortText(event.occurred_at, 40);
@@ -108,6 +137,36 @@ async function saveLeadDraft(request, env) {
       checkout_viewed_at = COALESCE(excluded.checkout_viewed_at, lead_drafts.checkout_viewed_at)`)
     .bind(body.visitor_id, draft.first_name, draft.last_name, draft.email, draft.phone, draft.profession, now, now,
       body.registration_submitted ? now : null, body.checkout_viewed ? now : null).run();
+  const completeDetails = [draft.first_name, draft.last_name, draft.email, draft.phone, draft.profession].every(Boolean);
+  if (completeDetails) {
+    await sendTelegramNotification(env, {
+      key: `registration_details_complete:${body.visitor_id}`,
+      visitorId: body.visitor_id,
+      eventType: 'registration_details_complete',
+      text: notificationText('New workshop registration details', [
+        `Visitor ID: <code>${escapeTelegramHtml(body.visitor_id)}</code>`,
+        `Name: ${escapeTelegramHtml(draft.first_name)} ${escapeTelegramHtml(draft.last_name)}`,
+        `WhatsApp: ${escapeTelegramHtml(draft.phone)}`,
+        `Email: ${escapeTelegramHtml(draft.email)}`,
+        `Profession: ${escapeTelegramHtml(draft.profession)}`,
+        'Status: details completed — payment not started yet',
+      ]),
+      payload: draft,
+    });
+  }
+  if (body.checkout_viewed && completeDetails) {
+    await sendTelegramNotification(env, {
+      key: `checkout_reached:${body.visitor_id}`,
+      visitorId: body.visitor_id,
+      eventType: 'checkout_reached',
+      text: notificationText('Registration reached checkout', [
+        `Visitor ID: <code>${escapeTelegramHtml(body.visitor_id)}</code>`,
+        `Name: ${escapeTelegramHtml(draft.first_name)} ${escapeTelegramHtml(draft.last_name)}`,
+        'Status: step 2 opened — payment not complete',
+      ]),
+      payload: { email: draft.email, profession: draft.profession },
+    });
+  }
   return json({ saved: true }, 202, cors(request, env));
 }
 
@@ -197,6 +256,22 @@ async function handlePaddleWebhook(request, env) {
       .bind(`paddle_${transaction.id}`, customData.visitor_id, customData.session_id, transaction.completed_at || now,
         toJson({ transaction_id: transaction.id, amount: transaction.details?.totals?.total || null, currency_code: transaction.currency_code || null })).run();
   }
+  await sendTelegramNotification(env, {
+    key: `payment_completed:${transaction.id}`,
+    visitorId: validId(customData.visitor_id) ? customData.visitor_id : null,
+    eventType: 'payment_completed',
+    text: notificationText('Payment confirmed', [
+      `Transaction: <code>${escapeTelegramHtml(transaction.id)}</code>`,
+      customData.visitor_id ? `Visitor ID: <code>${escapeTelegramHtml(customData.visitor_id)}</code>` : null,
+      customData.first_name || customData.last_name ? `Name: ${escapeTelegramHtml(`${customData.first_name || ''} ${customData.last_name || ''}`.trim())}` : null,
+      transaction.customer?.email || customData.email ? `Email: ${escapeTelegramHtml(transaction.customer?.email || customData.email)}` : null,
+      customData.phone ? `WhatsApp: ${escapeTelegramHtml(customData.phone)}` : null,
+      `Paid: ${escapeTelegramHtml(transaction.currency_code || 'INR')} ${(Number(transaction.details?.totals?.total || 0) / 100).toFixed(2)}`,
+      customData.selected_offer === 'bundle' ? 'Order: workshop + Build With AI add-on' : 'Order: workshop',
+      'Status: payment completed',
+    ]),
+    payload: { transaction_id: transaction.id, amount: transaction.details?.totals?.total || null, currency_code: transaction.currency_code || null, selected_offer: customData.selected_offer || 'workshop' },
+  });
   try { await sendMetaPurchase(request, transaction, customData, env); } catch { console.warn('Meta Purchase event could not be sent'); }
   return json({ received: true });
 }
