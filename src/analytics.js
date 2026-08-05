@@ -1,6 +1,7 @@
 const endpoint = import.meta.env.VITE_ANALYTICS_ENDPOINT || 'https://made-for-more-analytics.shanjairajdev.workers.dev';
 const visitorKey = 'madeForMoreVisitorId';
 const sessionKey = 'madeForMoreSessionId';
+const campaignKey = 'madeForMoreCampaign';
 let queue = [];
 let flushTimer;
 let started = false;
@@ -25,10 +26,19 @@ export function getSessionId() {
 
 function campaign() {
   const params = new URLSearchParams(location.search);
-  return Object.fromEntries(['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].flatMap((key) => {
+  const current = Object.fromEntries(['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].flatMap((key) => {
     const value = params.get(key);
     return value ? [[key, value.slice(0, 180)]] : [];
   }));
+  if (Object.keys(current).length) {
+    sessionStorage.setItem(campaignKey, JSON.stringify(current));
+    return current;
+  }
+  try {
+    return JSON.parse(sessionStorage.getItem(campaignKey) || '{}');
+  } catch {
+    return {};
+  }
 }
 
 function deviceType() {
