@@ -9,7 +9,7 @@ run_query() {
 }
 
 echo "\n=== Made for More: funnel ==="
-run_query "SELECT event_type AS step, COUNT(DISTINCT visitor_id) AS visitors FROM journey_events WHERE occurred_at >= datetime('now', '-30 days') AND event_type IN ('page_view','cta_clicked','registration_started','registration_details_saved','registration_submitted','checkout_viewed','addon_selected','paddle_checkout_opened') GROUP BY event_type ORDER BY CASE event_type WHEN 'page_view' THEN 1 WHEN 'cta_clicked' THEN 2 WHEN 'registration_started' THEN 3 WHEN 'registration_details_saved' THEN 4 WHEN 'registration_submitted' THEN 5 WHEN 'checkout_viewed' THEN 6 WHEN 'addon_selected' THEN 7 WHEN 'paddle_checkout_opened' THEN 8 END"
+run_query "SELECT event_type AS step, COUNT(DISTINCT visitor_id) AS visitors FROM journey_events WHERE occurred_at >= datetime('now', '-30 days') AND event_type IN ('page_view','cta_clicked','registration_started','registration_details_saved','registration_submitted','checkout_viewed','addon_selected','paddle_checkout_opened','manual_reservation_requested','manual_reservation_confirmed') GROUP BY event_type ORDER BY CASE event_type WHEN 'page_view' THEN 1 WHEN 'cta_clicked' THEN 2 WHEN 'registration_started' THEN 3 WHEN 'registration_details_saved' THEN 4 WHEN 'registration_submitted' THEN 5 WHEN 'checkout_viewed' THEN 6 WHEN 'addon_selected' THEN 7 WHEN 'paddle_checkout_opened' THEN 8 WHEN 'manual_reservation_requested' THEN 9 WHEN 'manual_reservation_confirmed' THEN 10 END"
 
 echo "\n=== Made for More: sections that hold attention ==="
 run_query "SELECT section_id, COUNT(*) AS visits, ROUND(AVG(CAST(json_extract(payload_json, '$.duration_ms') AS REAL)) / 1000, 1) AS average_seconds, ROUND(MAX(CAST(json_extract(payload_json, '$.duration_ms') AS REAL)) / 1000, 1) AS longest_seconds FROM journey_events WHERE event_type = 'section_leave' AND occurred_at >= datetime('now', '-30 days') GROUP BY section_id ORDER BY average_seconds DESC"
@@ -19,6 +19,8 @@ run_query "SELECT COUNT(*) AS saved_drafts, SUM(CASE WHEN registration_submitted
 
 echo "\n=== Made for More: verified Paddle payments ==="
 run_query "SELECT currency_code, COUNT(*) AS paid_orders, SUM(CAST(amount AS INTEGER)) AS total_minor_units FROM paddle_orders WHERE status = 'completed' AND completed_at >= datetime('now', '-30 days') GROUP BY currency_code"
+
+run_query "SELECT selected_offer, status, COUNT(*) AS reservations, SUM(amount_due) AS manual_payment_due FROM manual_reservations WHERE created_at >= datetime('now', '-30 days') GROUP BY selected_offer, status"
 
 echo "\n=== Made for More: Telegram notification delivery ==="
 run_query "SELECT event_type, status, COUNT(*) AS notifications FROM notification_log WHERE attempted_at >= datetime('now', '-30 days') GROUP BY event_type, status ORDER BY event_type, status"

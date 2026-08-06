@@ -8,8 +8,11 @@ const eventTypes = new Set([
   'section_reached', 'scroll_direction_change', 'cta_clicked', 'registration_started',
   'form_field_completed', 'registration_details_saved', 'registration_submitted',
   'checkout_viewed', 'addon_selected', 'addon_removed', 'paddle_checkout_opened',
-  'checkout_abandoned', 'payment_completed',
+  'checkout_abandoned', 'manual_reservation_requested', 'manual_reservation_confirmed',
+  'payment_completed',
 ]);
+
+let paddleAvailabilityCache = null;
 
 function allowedOrigin(request, env) {
   const origin = request.headers.get('origin') || '';
@@ -170,6 +173,100 @@ async function saveLeadDraft(request, env) {
   return json({ saved: true }, 202, cors(request, env));
 }
 
+async function paddleAvailability(request, env) {
+  const body = await request.json().catch(() => null);
+  const priceId = validShortText(body?.price_id, 80);
+  const domain = validShortText(body?.domain, 255)?.toLowerCase();
+  if (!priceId || !/^pri_[a-z\d]{20,60}$/.test(priceId)) return json({ available: false, reason: 'invalid_price' }, 400, cors(request, env));
+  if (!domain || !/^[a-z\d.-]+$/.test(domain)) return json({ available: false, reason: 'invalid_domain' }, 400, cors(request, env));
+
+  const now = Date.now();
+  if (paddleAvailabilityCache && paddleAvailabilityCache.priceId === priceId && paddleAvailabilityCache.domain === domain && now - paddleAvailabilityCache.checkedAt < 60_000) {
+    return json(paddleAvailabilityCache.result, 200, cors(request, env));
+  }
+  if (!env.PADDLE_API_KEY) {
+    const result = { available: false, reason: 'paddle_api_not_configured' };
+    paddleAvailabilityCache = { priceId, checkedAt: now, result };
+    return json(result, 200, cors(request, env));
+  }
+
+  try {
+    const headers = { authorization: `Bearer ${env.PADDLE_API_KEY}`, 'content-type': 'application/json' };
+    const [previewResponse, domainsResponse] = await Promise.all([
+      fetch('https://api.paddle.com/transactions/preview', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ items: [{ price_id: priceId, quantity: 1 }], currency_code: 'INR' }),
+      }),
+      fetch('https://api.paddle.com/checkout-domains', { headers }),
+    ]);
+    const preview = await previewResponse.json().catch(() => ({}));
+    const domains = await domainsResponse.json().catch(() => ({}));
+    const code = preview?.error?.code;
+    const checkoutDomain = Array.isArray(domains?.data) ? domains.data.find((item) => item.domain?.toLowerCase() === domain) : null;
+    const domainApproved = domainsResponse.ok && checkoutDomain?.status === 'approved';
+    const result = previewResponse.ok && domainApproved
+      ? { available: true, reason: 'preview_and_domain_approved' }
+      : { available: false, reason: code === 'transaction_checkout_not_enabled' ? 'checkout_not_enabled' : domainApproved ? 'paddle_unavailable' : 'checkout_domain_not_approved' };
+    paddleAvailabilityCache = { priceId, domain, checkedAt: now, result };
+    return json(result, 200, cors(request, env));
+  } catch {
+    const result = { available: false, reason: 'paddle_unreachable' };
+    paddleAvailabilityCache = { priceId, checkedAt: now, result };
+    return json(result, 200, cors(request, env));
+  }
+}
+
+async function createManualReservation(request, env) {
+  const body = await request.json().catch(() => null);
+  if (!body?.consent || !validId(body.visitor_id) || !validId(body.session_id)) return json({ error: 'Consent and a valid visitor session are required' }, 400, cors(request, env));
+  const selectedOffer = body.selected_offer === 'bundle' ? 'bundle' : body.selected_offer === 'workshop' ? 'workshop' : null;
+  const listedAmount = Number(body.listed_amount);
+  const discountAmount = Number(body.discount_amount);
+  const amountDue = Number(body.amount_due);
+  if (!selectedOffer || !Number.isInteger(listedAmount) || !Number.isInteger(discountAmount) || !Number.isInteger(amountDue) || listedAmount < 0 || discountAmount < 0 || amountDue < 0 || amountDue !== Math.max(0, listedAmount - discountAmount)) {
+    return json({ error: 'Invalid reservation total' }, 400, cors(request, env));
+  }
+  const fields = ['first_name', 'last_name', 'email', 'phone', 'profession'];
+  const lead = Object.fromEntries(fields.map((field) => [field, validShortText(body[field], 180)]));
+  if (![lead.first_name, lead.last_name, lead.email, lead.phone, lead.profession].every(Boolean) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email)) {
+    return json({ error: 'Complete registration details are required' }, 400, cors(request, env));
+  }
+  const now = new Date().toISOString();
+  const reservationId = `reserve_${crypto.randomUUID().replaceAll('-', '')}`;
+  await env.DB.batch([
+    env.DB.prepare(`INSERT INTO visitors (visitor_id, first_seen_at, last_seen_at)
+      VALUES (?, ?, ?) ON CONFLICT(visitor_id) DO UPDATE SET last_seen_at = excluded.last_seen_at`)
+      .bind(body.visitor_id, now, now),
+    env.DB.prepare(`INSERT INTO manual_reservations (visitor_id, reservation_id, session_id, first_name, last_name, email, phone, profession, selected_offer, listed_amount, early_bird_discount, amount_due, status, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'payment_details_to_send', ?, ?)
+      ON CONFLICT(visitor_id) DO UPDATE SET session_id = excluded.session_id, first_name = excluded.first_name, last_name = excluded.last_name,
+        email = excluded.email, phone = excluded.phone, profession = excluded.profession, selected_offer = excluded.selected_offer,
+        listed_amount = excluded.listed_amount, early_bird_discount = excluded.early_bird_discount, amount_due = excluded.amount_due,
+        status = excluded.status, updated_at = excluded.updated_at`)
+      .bind(body.visitor_id, reservationId, body.session_id, lead.first_name, lead.last_name, lead.email, lead.phone, lead.profession, selectedOffer, listedAmount, discountAmount, amountDue, now, now),
+  ]);
+  await sendTelegramNotification(env, {
+    key: `manual_reservation:${body.visitor_id}:${selectedOffer}`,
+    visitorId: body.visitor_id,
+    eventType: 'manual_reservation',
+    text: notificationText('Early-bird seat reserved — WhatsApp follow-up needed', [
+      `Visitor ID: <code>${escapeTelegramHtml(body.visitor_id)}</code>`,
+      `Name: ${escapeTelegramHtml(lead.first_name)} ${escapeTelegramHtml(lead.last_name)}`,
+      `WhatsApp: ${escapeTelegramHtml(lead.phone)}`,
+      `Email: ${escapeTelegramHtml(lead.email)}`,
+      `Profession: ${escapeTelegramHtml(lead.profession)}`,
+      selectedOffer === 'bundle' ? 'Selected: workshop + Build With AI live add-on' : 'Selected: main workshop only',
+      discountAmount > 0
+        ? `Listed amount: ₹${listedAmount} · discount: ₹${discountAmount} · manual payment due: ₹${amountDue}`
+        : `Payment to arrange: ₹${amountDue}`,
+      'Status: payment details must be sent manually — NOT PAID',
+    ]),
+    payload: { ...lead, selected_offer: selectedOffer, listed_amount: listedAmount, discount_amount: discountAmount, amount_due: amountDue },
+  });
+  return json({ reserved: true, reservation_id: reservationId, status: 'payment_details_to_send' }, 201, cors(request, env));
+}
+
 function parseSignature(header) {
   const entries = header.split(';').map((part) => part.trim().split('='));
   const timestamp = entries.find(([key]) => key === 'ts')?.[1];
@@ -284,6 +381,8 @@ export default {
     if (!allowedOrigin(request, env) && url.pathname !== '/v1/paddle/webhook') return json({ error: 'Origin not allowed' }, 403);
     if (request.method === 'POST' && url.pathname === '/v1/events') return saveEvents(request, env);
     if (request.method === 'POST' && url.pathname === '/v1/lead-drafts') return saveLeadDraft(request, env);
+    if (request.method === 'POST' && url.pathname === '/v1/paddle/availability') return paddleAvailability(request, env);
+    if (request.method === 'POST' && url.pathname === '/v1/manual-reservations') return createManualReservation(request, env);
     if (request.method === 'POST' && url.pathname === '/v1/paddle/webhook') return handlePaddleWebhook(request, env);
     return json({ error: 'Not found' }, 404, cors(request, env));
   },

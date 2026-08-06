@@ -110,6 +110,33 @@ export function saveLeadDraft(draft) {
   }).catch(() => {});
 }
 
+export async function checkPaddleAvailability(priceId) {
+  const response = await fetch(`${endpoint}/v1/paddle/availability`, {
+    method: 'POST',
+    mode: 'cors',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ price_id: priceId, domain: window.location.hostname }),
+  });
+  if (!response.ok) return { available: false, reason: 'availability_check_failed' };
+  return response.json();
+}
+
+export async function createManualReservation(reservation) {
+  const response = await fetch(`${endpoint}/v1/manual-reservations`, {
+    method: 'POST',
+    mode: 'cors',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      visitor_id: getVisitorId(),
+      session_id: getSessionId(),
+      consent: true,
+      ...reservation,
+    }),
+  });
+  if (!response.ok) throw new Error('Could not reserve the early-bird seat');
+  return response.json();
+}
+
 export function startJourney(route) {
   currentRoute = route || '/';
   if (!started) {

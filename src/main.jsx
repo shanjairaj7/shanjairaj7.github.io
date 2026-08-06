@@ -5,6 +5,8 @@ import './styles.css';
 import MadeForMoreAiWorkshop from './BeAheadAiWorkshop';
 import RegisterPage from './RegisterPage';
 import CheckoutPage from './CheckoutPage';
+import ReservationConfirmationPage from './ReservationConfirmationPage';
+import PaymentConfirmedPage from './PaymentConfirmedPage';
 import PricingPage from './PricingPage';
 import { observeSections, startJourney, track } from './analytics';
 import { initMetaPixel, trackMeta } from './metaPixel';
@@ -101,6 +103,8 @@ function Router() {
   if (route === '/build-app-with-ai') return <AppIdeaWorkshop/>;
   if (route === '/register') return <RegisterPage/>;
   if (route === '/checkout') return <CheckoutPage/>;
+  if (route === '/reservation-confirmed') return <ReservationConfirmationPage/>;
+  if (route === '/payment-confirmed') return <PaymentConfirmedPage/>;
   if (route === '/pricing') return <PricingPage/>;
   return <MadeForMoreAiWorkshop/>;
 }
