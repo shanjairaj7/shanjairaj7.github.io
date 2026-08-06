@@ -107,6 +107,11 @@ export default function CheckoutPage() {
         discount_amount: 0,
         amount_due: manualPaymentDue,
       });
+      trackMeta('Lead', {
+        content_name: addUpgrade ? 'Made for More workshop reservation + Build With AI add-on' : 'Made for More workshop reservation',
+        currency: 'INR',
+        value: manualPaymentDue,
+      }, { eventID: `reservation_${result.reservation_id}` });
       track('manual_reservation_confirmed', { amount_due: manualPaymentDue, includes_addon: addUpgrade });
       flush();
       window.sessionStorage.setItem('madeForMoreManualReservation', JSON.stringify({ ...result, firstName: registration.firstName, email: registration.email, phone: registration.phone, addUpgrade, listedAmount: total, discountAmount: 0, amountDue: manualPaymentDue }));
