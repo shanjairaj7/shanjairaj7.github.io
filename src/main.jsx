@@ -10,6 +10,7 @@ import PaymentConfirmedPage from './PaymentConfirmedPage';
 import PricingPage from './PricingPage';
 import { observeSections, startJourney, track } from './analytics';
 import { initMetaPixel, trackMeta } from './metaPixel';
+import { initCrisp } from './crisp';
 
 const scrollToOffer = () => document.querySelector('#enrol')?.scrollIntoView({ behavior: 'smooth' });
 
@@ -94,6 +95,7 @@ function Router() {
   }, []);
   useEffect(() => {
     initMetaPixel();
+    initCrisp();
     trackMeta('PageView');
     startJourney(route || '/');
     let stopObserving;
