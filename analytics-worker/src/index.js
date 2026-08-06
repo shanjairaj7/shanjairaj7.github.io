@@ -179,6 +179,7 @@ async function paddleAvailability(request, env) {
   const domain = validShortText(body?.domain, 255)?.toLowerCase();
   if (!priceId || !/^pri_[a-z\d]{20,60}$/.test(priceId)) return json({ available: false, reason: 'invalid_price' }, 400, cors(request, env));
   if (!domain || !/^[a-z\d.-]+$/.test(domain)) return json({ available: false, reason: 'invalid_domain' }, 400, cors(request, env));
+  if (env.PADDLE_LIVE_CHECKOUT_ENABLED !== 'true') return json({ available: false, reason: 'manual_reservation_mode' }, 200, cors(request, env));
 
   const now = Date.now();
   if (paddleAvailabilityCache && paddleAvailabilityCache.priceId === priceId && paddleAvailabilityCache.domain === domain && now - paddleAvailabilityCache.checkedAt < 60_000) {

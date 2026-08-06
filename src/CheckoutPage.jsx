@@ -59,6 +59,7 @@ export default function CheckoutPage() {
       token: paddleClientToken,
       eventCallback: (event) => {
         if (event.name === 'checkout.error') {
+          paddleRef.current?.Checkout.close();
           setPaddleStatus({ checking: false, available: false, reason: 'checkout_not_enabled' });
           setPaymentNotice('Paddle is not ready to take payments yet. Your early-bird seat can still be reserved below.');
           reserveRef.current?.();
