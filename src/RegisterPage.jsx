@@ -5,7 +5,6 @@ import './urgency.css';
 import { flush, saveLeadDraft, track } from './analytics';
 import { trackMeta } from './metaPixel';
 
-const registrationClosesAt = new Date('2026-08-15T23:59:00+05:30').getTime();
 const workshopPrice = 150;
 
 const countries = [
@@ -16,12 +15,7 @@ const countries = [
 ];
 
 function Countdown() {
-  const [now, setNow] = useState(Date.now());
-  useEffect(() => { const id = window.setInterval(() => setNow(Date.now()), 1000); return () => window.clearInterval(id); }, []);
-  const remaining = Math.max(0, registrationClosesAt - now);
-  const active = remaining > 0;
-  const parts = [Math.floor(remaining / 3_600_000), Math.floor((remaining % 3_600_000) / 60_000), Math.floor((remaining % 60_000) / 1_000)].map(n => String(n).padStart(2, '0'));
-  return <div className="rp-countdown"><span>{active ? 'EARLY-BIRD PRICE ENDS IN' : 'EARLY-BIRD PRICE HAS ENDED'}</span><strong>{active ? parts.join(':') : 'ENDED'}</strong><small>{active ? 'Early-bird registration ends Saturday at midnight.' : 'Please contact us for the next live workshop.'}</small></div>;
+  return <div className="rp-countdown"><span>THE NEXT LIVE SESSION IS YOUR CHANCE TO START</span><strong>16 AUG · 3–6 PM IST</strong><small>One practical workshop. Start using AI in your work from Monday.</small></div>;
 }
 
 function PhoneCountryPicker({ value, onChange }) {

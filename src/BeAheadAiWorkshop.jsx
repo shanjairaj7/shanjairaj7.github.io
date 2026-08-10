@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   ArrowRight, Check, ChevronDown, Clock3, Code2, Layers3,
   MessageCircle, ShieldCheck, Sparkles, Wand2, Zap
@@ -13,21 +13,8 @@ import { track } from './analytics';
 const enrol = (cta) => { track('cta_clicked', { cta }); window.location.href = '/#/register'; };
 const CTA = ({ children = 'Reserve my live seat' }) => <button className="ba-cta" onClick={() => enrol(children)}>{children}<ArrowRight size={17}/></button>;
 
-const registrationClosesAt = new Date('2026-08-15T23:59:00+05:30').getTime();
-
 function EarlyBirdTimer({ compact = false }) {
-  const [now, setNow] = useState(Date.now());
-  useEffect(() => {
-    const id = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(id);
-  }, []);
-  const remaining = Math.max(0, registrationClosesAt - now);
-  const active = remaining > 0;
-  const hours = String(Math.floor(remaining / 3_600_000)).padStart(2, '0');
-  const minutes = String(Math.floor((remaining % 3_600_000) / 60_000)).padStart(2, '0');
-  const seconds = String(Math.floor((remaining % 60_000) / 1_000)).padStart(2, '0');
-  if (!active) return <span className={compact ? 'ba-timer-compact' : 'ba-timer'}>EARLY-BIRD PRICE HAS ENDED</span>;
-  return <span className={compact ? 'ba-timer-compact' : 'ba-timer'}><b>EARLY-BIRD PRICE ENDS IN</b> <strong>{hours}:{minutes}:{seconds}</strong> <small>before Saturday midnight</small></span>;
+  return <span className={compact ? 'ba-timer-compact' : 'ba-timer'}><b>DO NOT WAIT UNTIL AI BECOMES NORMAL IN YOUR TEAM</b></span>;
 }
 
 function MediaSlot({ label, note, className = '', src }) {
