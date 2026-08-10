@@ -3,7 +3,7 @@ import { Check, LockKeyhole, Sparkles } from 'lucide-react';
 import './pricing.css';
 
 const workshopItems = [
-  'Live Claude & AI workshop — Sunday, 9 August, 3:00 PM–6:00 PM IST',
+  'Live Claude & AI workshop — Sunday, 16 August, 3:00 PM–6:00 PM IST',
   'Practical AI workflows for reports, Excel, presentations and research',
   'Build your first AI worker for repeat work',
   'Made for More workshop certificate',

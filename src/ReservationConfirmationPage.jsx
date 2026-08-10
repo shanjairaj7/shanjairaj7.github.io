@@ -14,7 +14,7 @@ export default function ReservationConfirmationPage() {
     <section className="reservation-card">
       <div className="reservation-icon"><CheckCircle2/></div>
       <h2>Here is what happens next</h2>
-      <p className="reservation-name">{reservation?.firstName ? `${reservation.firstName}, ` : ''}thank you for registering early.</p>
+      <p className="reservation-name">{reservation?.firstName ? `${reservation.firstName}, ` : ''}thank you for registering early. Your live session is Sunday, 16 August, 3:00 PM–6:00 PM IST.</p>
       <div className="reservation-amounts"><div><span>Workshop order</span><b>₹{reservation?.listedAmount ?? 150}</b></div><div><span>Payment to arrange</span><b>₹{reservation?.amountDue ?? 150}</b></div></div>
       {reservation?.addUpgrade && <p className="reservation-addon"><CheckCircle2/> Your optional Build With AI live add-on is included.</p>}
       <div className="reservation-contact"><p><Smartphone/><span><b>I will contact you on WhatsApp</b>Payment details will be sent to <strong>{reservation?.phone || 'your registered number'}</strong>.</span></p><p><Mail/><span><b>Workshop information by email</b>Joining information will be sent to <strong>{reservation?.email || 'your registered email'}</strong>.</span></p></div>

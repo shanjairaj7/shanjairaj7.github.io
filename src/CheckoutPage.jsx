@@ -146,10 +146,10 @@ export default function CheckoutPage() {
   const checkoutReady = paddleStatus.available;
   return <main className="register-page checkout-page">
     <header className="rp-top"><a href="/#/register"><ArrowLeft size={18}/> Back to details</a><a className="rp-brand" href="/">Made <span>for More</span></a></header>
-    <section data-track-section="checkout-intro" className="rp-hero co-hero"><p>ONE MORE STEP · LIVE THIS SUNDAY</p><h1>Your workshop seat is <em>almost reserved.</em></h1><span>Check your order below. Add the extra live session only if you want it.</span></section>
+    <section data-track-section="checkout-intro" className="rp-hero co-hero"><p>ONE MORE STEP · NEXT LIVE SESSION</p><h1>Your workshop seat is <em>almost reserved.</em></h1><span>Check your order below. Add the extra live session only if you want it.</span></section>
     <div className="rp-layout co-layout">
       <section data-track-section="checkout" className="rp-form-card co-payment-card" ref={checkoutCardRef}>
-        <div className="rp-card-title"><p>MADE FOR MORE LIVE CLAUDE & AI WORKSHOP</p><h2>Complete your registration</h2><span>Sunday, 9 August · 3:00 PM–6:00 PM IST · Live online</span></div>
+        <div className="rp-card-title"><p>MADE FOR MORE LIVE CLAUDE & AI WORKSHOP</p><h2>Complete your registration</h2><span>Sunday, 16 August · 3:00 PM–6:00 PM IST · Live online</span></div>
         <div className="co-summary"><div><span>Live workshop seat</span><b>₹{workshopPrice}</b></div>{addUpgrade && <div className="co-summary-added"><span>Build With AI live upgrade</span><b>₹{upgradePrice}</b></div>}<div className="co-summary-total"><span>{checkoutReady ? 'Total payable' : 'Payment to be arranged'}</span><b>₹{total}</b></div></div>
         <article className={`co-add-card ${addUpgrade ? 'is-added' : ''}`}>
           <div className="co-add-icon"><Sparkles/></div>
@@ -163,7 +163,7 @@ export default function CheckoutPage() {
         {paymentNotice && <p className="rp-setup-note"><b>Notice:</b> {paymentNotice}</p>}
         <div className="rp-security"><article><LockKeyhole/><div><b>{checkoutReady ? 'Secure checkout' : 'Secure seat request'}</b><span>{checkoutReady ? 'Payment happens with Paddle.' : 'No payment is taken on this page.'}</span></div></article><article><ShieldCheck/><div><b>Your details stay private</b><span>Used only for workshop registration.</span></div></article><article><Check/><div><b>Clear choice</b><span>The add-on is optional.</span></div></article></div><p className="co-policy-links"><a href="/terms.html">Terms</a> · <a href="/privacy.html">Privacy</a> · <a href="/refunds.html">Refund policy</a></p>
       </section>
-      <aside className="rp-summary rp-invitation co-side-summary"><p>YOUR LIVE WORKSHOP INVITATION</p><h2>Sunday, 9 August</h2><div className="rp-invite"><span><b>WHEN</b>3:00 PM–6:00 PM IST</span><span><b>WHERE</b>Live online workshop</span><span><b>WITH</b>Shanjai Raj</span></div><div className="rp-value"><p>YOUR MAIN WORKSHOP</p><span><Check/> Work faster with Claude & AI</span><span><Check/> Make reports, Excel and PPT easier</span><span><Check/> Build an AI worker for repeat work</span><span><Check/> Made for More workshop certificate</span></div><div className="rp-invite-price"><span>Early-bird live seat</span><b>₹{workshopPrice}</b></div></aside>
+      <aside className="rp-summary rp-invitation co-side-summary"><p>YOUR LIVE WORKSHOP INVITATION</p><h2>Sunday, 16 August</h2><div className="rp-invite"><span><b>WHEN</b>3:00 PM–6:00 PM IST</span><span><b>WHERE</b>Live online workshop</span><span><b>WITH</b>Shanjai Raj</span></div><div className="rp-value"><p>YOUR MAIN WORKSHOP</p><span><Check/> Work faster with Claude & AI</span><span><Check/> Make reports, Excel and PPT easier</span><span><Check/> Build an AI worker for repeat work</span><span><Check/> Made for More workshop certificate</span></div><div className="rp-invite-price"><span>Early-bird live seat</span><b>₹{workshopPrice}</b></div></aside>
     </div>
   </main>;
 }

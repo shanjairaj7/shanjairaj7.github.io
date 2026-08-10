@@ -140,7 +140,7 @@ async function saveLeadDraft(request, env) {
       checkout_viewed_at = COALESCE(excluded.checkout_viewed_at, lead_drafts.checkout_viewed_at)`)
     .bind(body.visitor_id, draft.first_name, draft.last_name, draft.email, draft.phone, draft.profession, now, now,
       body.registration_submitted ? now : null, body.checkout_viewed ? now : null).run();
-  const completeDetails = [draft.first_name, draft.last_name, draft.email, draft.phone, draft.profession].every(Boolean);
+  const completeDetails = [draft.first_name, draft.email, draft.phone].every(Boolean);
   if (completeDetails) {
     await sendTelegramNotification(env, {
       key: `registration_details_complete:${body.visitor_id}`,
@@ -148,10 +148,9 @@ async function saveLeadDraft(request, env) {
       eventType: 'registration_details_complete',
       text: notificationText('New workshop registration details', [
         `Visitor ID: <code>${escapeTelegramHtml(body.visitor_id)}</code>`,
-        `Name: ${escapeTelegramHtml(draft.first_name)} ${escapeTelegramHtml(draft.last_name)}`,
+        `Name: ${escapeTelegramHtml(draft.first_name)}`,
         `WhatsApp: ${escapeTelegramHtml(draft.phone)}`,
         `Email: ${escapeTelegramHtml(draft.email)}`,
-        `Profession: ${escapeTelegramHtml(draft.profession)}`,
         'Status: details completed — payment not started yet',
       ]),
       payload: draft,
@@ -164,7 +163,7 @@ async function saveLeadDraft(request, env) {
       eventType: 'checkout_reached',
       text: notificationText('Registration reached checkout', [
         `Visitor ID: <code>${escapeTelegramHtml(body.visitor_id)}</code>`,
-        `Name: ${escapeTelegramHtml(draft.first_name)} ${escapeTelegramHtml(draft.last_name)}`,
+        `Name: ${escapeTelegramHtml(draft.first_name)}`,
         'Status: step 2 opened — payment not complete',
       ]),
       payload: { email: draft.email, profession: draft.profession },
@@ -230,9 +229,11 @@ async function createManualReservation(request, env) {
   }
   const fields = ['first_name', 'last_name', 'email', 'phone', 'profession'];
   const lead = Object.fromEntries(fields.map((field) => [field, validShortText(body[field], 180)]));
-  if (![lead.first_name, lead.last_name, lead.email, lead.phone, lead.profession].every(Boolean) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email)) {
+  if (![lead.first_name, lead.email, lead.phone].every(Boolean) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email)) {
     return json({ error: 'Complete registration details are required' }, 400, cors(request, env));
   }
+  lead.last_name ||= 'Not provided';
+  lead.profession ||= 'Not provided';
   const now = new Date().toISOString();
   const reservationId = `reserve_${crypto.randomUUID().replaceAll('-', '')}`;
   await env.DB.batch([
@@ -253,10 +254,9 @@ async function createManualReservation(request, env) {
     eventType: 'manual_reservation',
     text: notificationText('Early-bird seat reserved — WhatsApp follow-up needed', [
       `Visitor ID: <code>${escapeTelegramHtml(body.visitor_id)}</code>`,
-      `Name: ${escapeTelegramHtml(lead.first_name)} ${escapeTelegramHtml(lead.last_name)}`,
+      `Name: ${escapeTelegramHtml(lead.first_name)}`,
       `WhatsApp: ${escapeTelegramHtml(lead.phone)}`,
       `Email: ${escapeTelegramHtml(lead.email)}`,
-      `Profession: ${escapeTelegramHtml(lead.profession)}`,
       selectedOffer === 'bundle' ? 'Selected: workshop + Build With AI live add-on' : 'Selected: main workshop only',
       discountAmount > 0
         ? `Listed amount: ₹${listedAmount} · discount: ₹${discountAmount} · manual payment due: ₹${amountDue}`
